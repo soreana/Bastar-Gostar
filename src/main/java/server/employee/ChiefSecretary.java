@@ -1,9 +1,8 @@
 package server.employee;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import server.OpenflowHelper;
+
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -12,11 +11,13 @@ import java.util.ArrayList;
  */
 
 public class ChiefSecretary {
+
     private class Secretary implements Runnable {
         private Thread thread;
         private Socket client;
         private PrintWriter out;
         private BufferedReader in;
+        private char [] buff = new char[2048];
 
         public Secretary(){
             thread = new Thread( this );
@@ -38,15 +39,28 @@ public class ChiefSecretary {
             return thread.getState();
         }
 
+
         @Override
         public void run() {
-            String input ;
+
             try {
-                while( (input = in.readLine() ) != null ){
-                    System.out.println( input );
-                    out.println(input);
-                }
-            } catch (IOException e) {
+                // read Hello
+                System.out.println("************ start ****************");
+
+
+//                OpenflowHelper.showHeader(OpenflowHelper.featureReq(buff));
+
+//                out.write(OpenflowHelper.featureReq(buff));
+
+//                OpenflowHelper.readFeatureRes(buff);
+
+//                OpenflowHelper.showHeader(buff);
+
+                System.out.println("\n************ end ****************");
+
+                Thread.sleep(1000);
+
+            } catch ( InterruptedException e) {
                 e.printStackTrace();
             }
 
