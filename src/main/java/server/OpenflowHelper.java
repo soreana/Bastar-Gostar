@@ -31,23 +31,29 @@ public interface OpenflowHelper {
     }
 
     static void showHeader(char [] buff){
-        System.out.printf("Openflow version: %s\nMessage type: %d\nsize: %d\nxid: %s",
+        System.out.printf("Openflow version: %s\nMessage type: %d\nsize: %d\nxid: %s\n",
                 openflowVersion((int)buff[0]),(int) buff[1],packetSize(buff),packetXid(buff));
     }
 
+    static void showHeader(byte[] buff) {
+        showHeader(new String(buff).toCharArray());
+    }
+
     static byte[] helloReply(char [] buff){
+        return buildPacketFromTemplate(buff, helloReplyTemplate);
+    }
+
+    static byte[] buildPacketFromTemplate(char[] buff, byte[] template) {
         for (int i = 4; i < 8; i++) {
-            helloReplyTemplate[i] = (byte) buff[i];
+            template[i] = (byte) buff[i];
         }
-        return helloReplyTemplate;
+        template[7] ++;
+        buff[7] ++;
+        return template;
     }
 
     static byte[] featureReq(char [] buff){
-        for (int i = 4; i < 8; i++) {
-            featureRequestTemplate[i] = (byte) buff[i];
-        }
-        featureRequestTemplate[7]++;
-        return featureRequestTemplate;
+        return buildPacketFromTemplate(buff, featureRequestTemplate);
     }
 
 //    static char [] readFeatureRes(char [] buff){

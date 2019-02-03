@@ -17,21 +17,9 @@ public class Server {
     private static BufferedReader bin;
     private static char[] buff = new char[2048];
 
-    public static void handleHello() throws IOException {
-        OpenflowHelper.readHelloRequest(new BufferedReader(new InputStreamReader(in)), buff);
-
-        OpenflowHelper.showHeader(buff);
-        System.out.println();
-
-        out.write(OpenflowHelper.helloReply(buff));
-//        OpenflowHelper.showHeader(OpenflowHelper.helloReply(buff));
-    }
-
     public static void main(String[] args) {
         int portNumber = Integer.parseInt(args[0]);
-        try (
-                ServerSocket serverSocket = new ServerSocket(portNumber);
-        ) {
+        try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
 //                chiefSecretary.giveBrieflessSecretaryThisClient(serverSocket.accept());
             serverSocket.accept();
             Socket s = serverSocket.accept();
@@ -40,19 +28,17 @@ public class Server {
             in = s.getInputStream();
             bin = new BufferedReader(new InputStreamReader(in));
 
-            handleHello();
+            // handle hello
+            OpenflowHelper.readHelloRequest(new BufferedReader(new InputStreamReader(in)), buff);
+            out.write(OpenflowHelper.helloReply(buff));
+
             out.write(OpenflowHelper.featureReq(buff));
 
-//            OpenflowHelper.readHeader(bin, buff);
-            bin.read(buff,0,20);
+            OpenflowHelper.readHeader(bin, buff);
             OpenflowHelper.showHeader(buff);
-            for (int i = 0; i < 20; i++) {
-                System.out.println((int) buff[i]);
-            }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 }
