@@ -2,6 +2,7 @@ package server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 
 public interface OpenflowHelper {
     byte []  helloReplyTemplate = {4,0,0,8,0,0,0,0};
@@ -27,7 +28,11 @@ public interface OpenflowHelper {
     }
 
     static int packetXid(char [] buff){
-        return buff[4]*16777216+buff[5]*65536+buff[6]*256+buff[7];
+        return getInt(Arrays.copyOfRange(buff,4,8));
+    }
+
+    static int getInt(char[] buff){
+        return buff[0]*16777216+buff[1]*65536+buff[2]*256+buff[3];
     }
 
     static void showHeader(char [] buff){
@@ -56,17 +61,26 @@ public interface OpenflowHelper {
         return buildPacketFromTemplate(buff, featureRequestTemplate);
     }
 
-//    static char [] readFeatureRes(char [] buff){
-//        System.arraycopy(buff, 4, featureRequestTemplate, 4, 4);
-//        featureRequestTemplate[7]++;
-//        return featureRequestTemplate;
-//    }
-
-    static void readHeader(BufferedReader in, char[] buff) throws IOException {
-        in.read(buff,0,8);
+    static void readPayload(BufferedReader bin , char [] buff,int len) throws IOException {
+        bin.read(buff,0,len);
     }
 
-    static void readHelloRequest(BufferedReader in, char[] buff) throws IOException {
-        in.read(buff,0,8);
+    static int readHeader(BufferedReader bin, char[] buff) throws IOException {
+        bin.read(buff,0,8);
+        return packetSize(buff);
+    }
+
+    static void readHelloRequest(BufferedReader bin, char[] buff) throws IOException {
+        bin.read(buff,0,8);
+    }
+
+    static FeatureRes parsePayloadAsFeatureRes(char[] buff, int payloadSize) {
+        return new FeatureRes(
+                Arrays.copyOfRange(buff,0,8),
+                Arrays.copyOfRange(buff,8,12),
+                buff[12],buff[13],
+                Arrays.copyOfRange(buff,16,20),
+                Arrays.copyOfRange(buff,20,24)
+        );
     }
 }

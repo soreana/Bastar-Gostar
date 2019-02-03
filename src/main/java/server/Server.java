@@ -16,6 +16,7 @@ public class Server {
     private static InputStream in;
     private static BufferedReader bin;
     private static char[] buff = new char[2048];
+    private static char[] features = new char[2048];
 
     public static void main(String[] args) {
         int portNumber = Integer.parseInt(args[0]);
@@ -34,8 +35,11 @@ public class Server {
 
             out.write(OpenflowHelper.featureReq(buff));
 
-            OpenflowHelper.readHeader(bin, buff);
-            OpenflowHelper.showHeader(buff);
+            int payloadSize = OpenflowHelper.readHeader(bin, buff);
+
+            OpenflowHelper.readPayload(bin,buff,payloadSize);
+
+            System.out.println(OpenflowHelper.parsePayloadAsFeatureRes(buff,payloadSize));
 
         } catch (IOException e) {
             e.printStackTrace();
