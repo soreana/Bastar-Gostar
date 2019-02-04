@@ -1,4 +1,4 @@
-package server;
+package server.openflow;
 
 import java.io.BufferedReader;
 import java.io.IOException;
