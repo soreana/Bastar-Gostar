@@ -4,26 +4,41 @@ import java.io.*;
 import java.net.Socket;
 
 public class Switch {
-    private static OutputStream out;
-    private static InputStream in;
-    private static BufferedReader bin;
+    private final OutputStream out;
+    private final InputStream in;
+    private final BufferedReader bin;
+    private final Socket s;
+    private final FeatureRes featureRes;
+
     private static char[] buff = new char[2048];
 
-    public Switch(Socket s) throws IOException {
-        out = s.getOutputStream();
-        in = s.getInputStream();
+    public Switch(Socket socket) throws IOException {
+        out = socket.getOutputStream();
+        in = socket.getInputStream();
         bin = new BufferedReader(new InputStreamReader(in));
+        s = socket;
+        featureRes = handshake();
+
+        // todo replace this with appropriate log
+        System.out.println(featureRes);
     }
 
-    public void handshake() throws IOException {
+    private FeatureRes handshake() throws IOException {
         // hello phase
         OpenflowHelper.readHelloRequest(new BufferedReader(new InputStreamReader(in)), buff);
         out.write(OpenflowHelper.helloReply(buff));
 
+        // FeatureReq and FeatureRes
         out.write(OpenflowHelper.featureReq(buff));
         int payloadSize = OpenflowHelper.readHeader(bin, buff);
         OpenflowHelper.readPayload(bin,buff,payloadSize);
 
-        System.out.println(OpenflowHelper.parsePayloadAsFeatureRes(buff,payloadSize));
+        return OpenflowHelper.parsePayloadAsFeatureRes(buff,payloadSize);
+    }
+
+    public void echoReq() throws IOException {
+    }
+
+    public void echoRes() {
     }
 }

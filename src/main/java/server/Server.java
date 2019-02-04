@@ -17,14 +17,12 @@ public class Server {
     public static void main(String[] args) {
         int portNumber = Integer.parseInt(args[0]);
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
-//                chiefSecretary.giveBrieflessSecretaryThisClient(serverSocket.accept());
 
             // Skip Mininet connection
             serverSocket.accept();
 
-            Switch sw = new Switch(serverSocket.accept());
-
-            sw.handshake();
+            while (true)
+                chiefSecretary.giveBrieflessSecretaryThisClient(new Switch(serverSocket.accept()));
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -1,7 +1,8 @@
 package server.employee;
 
-import java.io.*;
-import java.net.Socket;
+import server.openflow.Switch;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -12,28 +13,18 @@ public class ChiefSecretary {
 
     private class Secretary implements Runnable {
         private Thread thread;
-        private Socket client;
-        private PrintWriter out;
-        private BufferedReader in;
-        private char [] buff = new char[2048];
+        private Switch sw;
 
-        public Secretary(){
+        Secretary(){
             thread = new Thread( this );
         }
 
-        public void setClient(Socket client){
-            this.client = client;
-            try {
-                out = new PrintWriter( client.getOutputStream(), true);
-                in = new BufferedReader(
-                        new InputStreamReader( client.getInputStream()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        void setClient(Switch sw){
+            this.sw = sw;
             thread.start();
         }
 
-        public Thread.State getThreadState(){
+        Thread.State getThreadState(){
             return thread.getState();
         }
 
@@ -45,27 +36,18 @@ public class ChiefSecretary {
                 // read Hello
                 System.out.println("************ start ****************");
 
-
-//                OpenflowHelper.showHeader(OpenflowHelper.featureReq(buff));
-
-//                out.write(OpenflowHelper.featureReq(buff));
-
-//                OpenflowHelper.readFeatureRes(buff);
-
-//                OpenflowHelper.showHeader(buff);
+                // todo read port status
+                for (int i = 0; i < 10; i++) {
+                    sw.echoReq();
+                    sw.echoRes();
+                    Thread.sleep(100);
+                }
 
                 System.out.println("\n************ end ****************");
 
-                Thread.sleep(1000);
-
-            } catch ( InterruptedException e) {
+            } catch ( IOException | InterruptedException e) {
                 e.printStackTrace();
             }
-
-            // remove client
-            client = null;
-            in  = null;
-            out = null;
         }
     }
 
@@ -78,19 +60,19 @@ public class ChiefSecretary {
 
     private ChiefSecretary() {
         pool = new ArrayList<>();
-        for (int i=0 ; i<10 ; i++)
+        for (int i=0 ; i<5 ; i++)
             pool.add(new Secretary());
     }
 
-    public void giveBrieflessSecretaryThisClient( Socket client ){
+    public void giveBrieflessSecretaryThisClient(Switch sw){
         for(Secretary secretary : pool)
             if( secretary.getThreadState() == Thread.State.NEW){
-                secretary.setClient(client);
+                secretary.setClient(sw);
                 return;
             }
 
         Secretary secretary = new Secretary();
         pool.add(secretary);
-        secretary.setClient(client);
+        secretary.setClient(sw);
     }
 }
