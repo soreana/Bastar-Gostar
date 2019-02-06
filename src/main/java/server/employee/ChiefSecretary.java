@@ -1,5 +1,6 @@
 package server.employee;
 
+import server.openflow.OFHeader;
 import server.openflow.Switch;
 
 import java.io.IOException;
@@ -15,41 +16,54 @@ public class ChiefSecretary {
         private Thread thread;
         private Switch sw;
 
-        Secretary(){
-            thread = new Thread( this );
+        Secretary() {
+            thread = new Thread(this);
         }
 
-        void setClient(Switch sw){
+        void setClient(Switch sw) {
             this.sw = sw;
             thread.start();
         }
 
-        Thread.State getThreadState(){
+        Thread.State getThreadState() {
             return thread.getState();
         }
 
 
         @Override
         public void run() {
-
+            OFHeader header;
             try {
-                // read Hello
-                System.out.println("************ start ****************");
+                while (true) {
+                    header = sw.nextHeader();
+                    System.out.println(header);
 
-                // todo read port status
-                for (int i = 0; i < 10; i++) {
-                    Thread.sleep(100);
+                    switch (header.ofType) {
+                        case HELLO:
+                            // todo switch connection lost refresh switch connection
+                            break;
+                        case ECHO_REQ:
+                            sw.readEchoReqPayload(header);
+                            sw.sendEchoRes();
+                            break;
+                        case ECHO_RES:
+                            sw.readEchoResPayload(header);
+                            break;
+                        case PORT_STATUS:
+                            sw.readPortStatus(header);
+                            break;
+                        case NotImplemented:
+                            // todo send to controller.
+                            break;
+                    }
                 }
-
-                System.out.println("\n************ end ****************");
-
-            } catch ( InterruptedException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private ArrayList<Secretary> pool ;
+    private ArrayList<Secretary> pool;
     private static ChiefSecretary ourInstance = new ChiefSecretary();
 
     public static ChiefSecretary getInstance() {
@@ -58,13 +72,13 @@ public class ChiefSecretary {
 
     private ChiefSecretary() {
         pool = new ArrayList<>();
-        for (int i=0 ; i<5 ; i++)
+        for (int i = 0; i < 5; i++)
             pool.add(new Secretary());
     }
 
-    public void giveBrieflessSecretaryThisClient(Switch sw){
-        for(Secretary secretary : pool)
-            if( secretary.getThreadState() == Thread.State.NEW){
+    public void giveBrieflessSecretaryThisClient(Switch sw) {
+        for (Secretary secretary : pool)
+            if (secretary.getThreadState() == Thread.State.NEW) {
                 secretary.setClient(sw);
                 return;
             }
