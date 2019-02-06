@@ -38,14 +38,12 @@ public class ChiefSecretary {
 
                 // todo read port status
                 for (int i = 0; i < 10; i++) {
-                    sw.echoReq();
-                    sw.echoRes();
                     Thread.sleep(100);
                 }
 
                 System.out.println("\n************ end ****************");
 
-            } catch ( IOException | InterruptedException e) {
+            } catch ( InterruptedException e) {
                 e.printStackTrace();
             }
         }

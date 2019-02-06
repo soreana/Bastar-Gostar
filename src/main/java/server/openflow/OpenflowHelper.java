@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public interface OpenflowHelper {
-    byte []  helloReplyTemplate = {4,0,0,8,0,0,0,0};
-    byte []  featureRequestTemplate = {4,5,0,8,0,0,0,0};
+    byte [] helloReplyTemplate = {4,0,0,8,0,0,0,0};
+    byte [] featureRequestTemplate = {4,5,0,8,0,0,0,0};
+    byte [] echoResTemplate = {4,3,0,8,0,0,0,0};
 
     static String openflowVersion(int i){
         if(i==5)
@@ -61,13 +62,17 @@ public interface OpenflowHelper {
         return buildPacketFromTemplate(buff, featureRequestTemplate);
     }
 
+    static byte[] echoRes(char [] buff){
+        return buildPacketFromTemplate(buff, echoResTemplate);
+    }
+
     static void readPayload(BufferedReader bin , char [] buff,int len) throws IOException {
         bin.read(buff,0,len);
     }
 
     static int readHeader(BufferedReader bin, char[] buff) throws IOException {
         bin.read(buff,0,8);
-        return packetSize(buff);
+        return packetSize(buff)-8;
     }
 
     static void readHelloRequest(BufferedReader bin, char[] buff) throws IOException {

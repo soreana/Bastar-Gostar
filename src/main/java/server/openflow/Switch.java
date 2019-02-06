@@ -18,9 +18,6 @@ public class Switch {
         bin = new BufferedReader(new InputStreamReader(in));
         s = socket;
         featureRes = handshake();
-
-        // todo replace this with appropriate log
-        System.out.println(featureRes);
     }
 
     private FeatureRes handshake() throws IOException {
@@ -31,14 +28,37 @@ public class Switch {
         // FeatureReq and FeatureRes
         out.write(OpenflowHelper.featureReq(buff));
         int payloadSize = OpenflowHelper.readHeader(bin, buff);
-        OpenflowHelper.readPayload(bin,buff,payloadSize);
+        OpenflowHelper.readPayload(bin, buff, payloadSize);
 
-        return OpenflowHelper.parsePayloadAsFeatureRes(buff,payloadSize);
+        return OpenflowHelper.parsePayloadAsFeatureRes(buff, payloadSize);
     }
 
-    public void echoReq() throws IOException {
+    public void readPortStatus(OFHeader header) throws IOException {
+        OpenflowHelper.readPayload(bin, buff, header.payloadSize());
+        // todo show payload
     }
 
-    public void echoRes() {
+    public void readEchoReqPayload(OFHeader header) throws IOException {
+        readEchoResPayload(header);
+    }
+
+    public OFHeader nextHeader() throws IOException {
+        OpenflowHelper.readHeader(bin, buff);
+        return new OFHeader(
+                buff[0],
+                OFType.valueOf(buff[1]),
+                OpenflowHelper.packetSize(buff),
+                OpenflowHelper.packetXid(buff)
+        );
+    }
+
+    public void readEchoResPayload(OFHeader header) throws IOException {
+        if (header.payloadSize() == 0)
+            return;
+        OpenflowHelper.readPayload(bin, buff, header.payloadSize());
+    }
+
+    public void sendEchoRes() throws IOException {
+        out.write(OpenflowHelper.echoRes(buff));
     }
 }
