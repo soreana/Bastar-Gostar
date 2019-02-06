@@ -3,7 +3,7 @@ package server.openflow;
 import java.io.*;
 import java.net.Socket;
 
-public class Switch {
+public class SwitchPipe {
     private final OutputStream out;
     private final InputStream in;
     private final BufferedReader bin;
@@ -12,7 +12,7 @@ public class Switch {
 
     private static char[] buff = new char[2048];
 
-    public Switch(Socket socket) throws IOException {
+    public SwitchPipe(Socket socket) throws IOException {
         out = socket.getOutputStream();
         in = socket.getInputStream();
         bin = new BufferedReader(new InputStreamReader(in));

@@ -1,7 +1,7 @@
 package server.employee;
 
 import server.openflow.OFHeader;
-import server.openflow.Switch;
+import server.openflow.SwitchPipe;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,14 +14,14 @@ public class ChiefSecretary {
 
     private class Secretary implements Runnable {
         private Thread thread;
-        private Switch sw;
+        private SwitchPipe swp;
 
         Secretary() {
             thread = new Thread(this);
         }
 
-        void setClient(Switch sw) {
-            this.sw = sw;
+        void setClient(SwitchPipe swp) {
+            this.swp = swp;
             thread.start();
         }
 
@@ -35,7 +35,7 @@ public class ChiefSecretary {
             OFHeader header;
             try {
                 while (true) {
-                    header = sw.nextHeader();
+                    header = swp.nextHeader();
                     System.out.println(header);
 
                     switch (header.ofType) {
@@ -43,14 +43,14 @@ public class ChiefSecretary {
                             // todo switch connection lost refresh switch connection
                             break;
                         case ECHO_REQ:
-                            sw.readEchoReqPayload(header);
-                            sw.sendEchoRes();
+                            swp.readEchoReqPayload(header);
+                            swp.sendEchoRes();
                             break;
                         case ECHO_RES:
-                            sw.readEchoResPayload(header);
+                            swp.readEchoResPayload(header);
                             break;
                         case PORT_STATUS:
-                            sw.readPortStatus(header);
+                            swp.readPortStatus(header);
                             break;
                         case NotImplemented:
                             // todo send to controller.
@@ -76,15 +76,15 @@ public class ChiefSecretary {
             pool.add(new Secretary());
     }
 
-    public void giveBrieflessSecretaryThisClient(Switch sw) {
+    public void giveBrieflessSecretaryThisClient(SwitchPipe swp) {
         for (Secretary secretary : pool)
             if (secretary.getThreadState() == Thread.State.NEW) {
-                secretary.setClient(sw);
+                secretary.setClient(swp);
                 return;
             }
 
         Secretary secretary = new Secretary();
         pool.add(secretary);
-        secretary.setClient(sw);
+        secretary.setClient(swp);
     }
 }

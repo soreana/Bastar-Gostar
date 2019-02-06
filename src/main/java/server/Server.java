@@ -1,8 +1,7 @@
 package server;
 
 import server.employee.ChiefSecretary;
-import server.openflow.OFHeader;
-import server.openflow.Switch;
+import server.openflow.SwitchPipe;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -23,7 +22,7 @@ public class Server {
             serverSocket.accept();
 
 //            while (true)
-            chiefSecretary.giveBrieflessSecretaryThisClient(new Switch(serverSocket.accept()));
+            chiefSecretary.giveBrieflessSecretaryThisClient(new SwitchPipe(serverSocket.accept()));
 
 
         } catch (IOException e) {
